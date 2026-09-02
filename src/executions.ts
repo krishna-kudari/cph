@@ -199,16 +199,10 @@ export const deleteBinary = (language: Language, binPath: string) => {
     }
     globalThis.logger.log('Deleting binary', binPath);
     try {
-        const isLinux = platform() == 'linux';
+        const isWindows = platform() === 'win32';
         const isFile = path.extname(binPath);
 
-        if (isLinux) {
-            if (isFile) {
-                spawn('rm', [binPath]);
-            } else {
-                spawn('rm', ['-r', binPath]);
-            }
-        } else {
+        if (isWindows) {
             const nrmBinPath = '"' + binPath + '"';
             if (isFile) {
                 spawn('cmd.exe', ['/c', 'del', nrmBinPath], {
@@ -219,6 +213,10 @@ export const deleteBinary = (language: Language, binPath: string) => {
                     windowsVerbatimArguments: true,
                 });
             }
+        } else if (isFile) {
+            spawn('rm', [binPath]);
+        } else {
+            spawn('rm', ['-r', binPath]);
         }
     } catch (err) {
         globalThis.logger.error('Error while deleting binary', err);
